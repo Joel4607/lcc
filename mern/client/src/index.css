@@ -1,0 +1,135 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html {
+    font-family: "Manrope", "Segoe UI", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #d2dae5 0%, #c5cfdb 100%);
+    color: #0f172a;
+  }
+
+  .dark body {
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    color: #e2e8f0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .dark .bg-white {
+    background-color: #0f172a !important;
+  }
+
+  .dark .bg-slate-50 {
+    background-color: #111827 !important;
+  }
+
+  .dark .bg-slate-100 {
+    background-color: #1f2937 !important;
+  }
+
+  .dark .bg-slate-100\/80 {
+    background-color: rgba(31, 41, 55, 0.8) !important;
+  }
+
+  .dark .bg-slate-300\/80 {
+    background-color: rgba(15, 23, 42, 0.9) !important;
+  }
+
+  .dark .border-slate-200 {
+    border-color: #334155 !important;
+  }
+
+  .dark .border-slate-300,
+  .dark .border-slate-300\/70 {
+    border-color: #475569 !important;
+  }
+
+  .dark .text-slate-950,
+  .dark .text-slate-900 {
+    color: #f8fafc !important;
+  }
+
+  .dark .text-slate-700 {
+    color: #cbd5e1 !important;
+  }
+
+  .dark .text-slate-600,
+  .dark .text-slate-500 {
+    color: #94a3b8 !important;
+  }
+
+  .dark .text-slate-400 {
+    color: #64748b !important;
+  }
+
+  .dark .shadow-\[0_16px_30px_-24px_rgba\(15\,23\,42\,0\.3\)\],
+  .dark .shadow-\[0_25px_90px_-55px_rgba\(15\,23\,42\,0\.5\)\],
+  .dark .shadow-\[0_24px_80px_-48px_rgba\(15\,23\,42\,0\.35\)\],
+  .dark .shadow-\[0_24px_80px_-48px_rgba\(15\,23\,42\,0\.55\)\] {
+    box-shadow: 0 18px 40px -28px rgba(2, 6, 23, 0.9) !important;
+  }
+
+  .dark input,
+  .dark select,
+  .dark textarea {
+    background-color: #0b1220 !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #64748b !important;
+  }
+
+  .dark table thead tr {
+    color: #94a3b8 !important;
+  }
+
+  .dark table tbody {
+    color: #cbd5e1 !important;
+  }
+
+  .dark .hover\:bg-white\/80:hover {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+  }
+
+  .dark .bg-sky-600 {
+    background-color: #0284c7 !important;
+  }
+}
