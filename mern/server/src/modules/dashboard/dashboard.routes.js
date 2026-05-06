@@ -764,9 +764,9 @@ router.get(
       });
       const { buscellId } = await resolveScopedBuscellId(req, req.query.buscellId, {
         branchId,
-        required: req.accessScope?.role !== ROLES.ECCLESIA_LEADER,
+        required: true,
         requiredMessage: "buscellId is required for the buscell dashboard.",
-        forbiddenMessage: "You can only access your own buscell dashboard.",
+        forbiddenMessage: "You can only access buscell dashboards in your own Ecclesia.",
         branchMismatchMessage: "Selected buscell does not belong to the allowed branch.",
       });
       const buscell = await loadBuscell(buscellId);
@@ -982,60 +982,68 @@ router.get(
       }
 
       assertMemberWithinScope(req, member, {
-        ecclesiaLeaderOwnBuscellOnly: req.accessScope?.role === ROLES.ECCLESIA_LEADER,
+        ecclesiaLeaderOwnBuscellOnly: false,
         branchMessage: "You can only access member dashboards in your branch.",
-        buscellMessage: "You can only access member dashboards for members in your own buscell.",
+        ecclesiaMessage: "You can only access member dashboards in your Ecclesia.",
       });
 
-      const [attendanceSummaryRows, financeSummaryRows, recentAttendance, recentFinance] =
+      const isFinanceAdmin = req.accessScope?.role === ROLES.FINANCE_ADMIN;
+      const [
+        attendanceSummaryRows,
+        financeSummaryRows,
+        recentAttendance,
+        recentFinance,
+      ] =
         await Promise.all([
-          Attendance.aggregate([
-            {
-              $match: {
-                memberId: member._id,
-              },
-            },
-            {
-              $facet: {
-                totals: [
-                  {
-                    $group: {
-                      _id: null,
-                      totalAttendances: { $sum: 1 },
-                      presentCount: {
-                        $sum: {
-                          $cond: [{ $eq: ["$status", "PRESENT"] }, 1, 0],
-                        },
-                      },
-                      absentCount: {
-                        $sum: {
-                          $cond: [{ $eq: ["$status", "ABSENT"] }, 1, 0],
-                        },
-                      },
-                    },
+          isFinanceAdmin
+            ? Promise.resolve(null)
+            : Attendance.aggregate([
+                {
+                  $match: {
+                    memberId: member._id,
                   },
-                ],
-                byMeetingType: [
-                  {
-                    $group: {
-                      _id: "$meetingType",
-                      totalRecords: { $sum: 1 },
-                      presentCount: {
-                        $sum: {
-                          $cond: [{ $eq: ["$status", "PRESENT"] }, 1, 0],
+                },
+                {
+                  $facet: {
+                    totals: [
+                      {
+                        $group: {
+                          _id: null,
+                          totalAttendances: { $sum: 1 },
+                          presentCount: {
+                            $sum: {
+                              $cond: [{ $eq: ["$status", "PRESENT"] }, 1, 0],
+                            },
+                          },
+                          absentCount: {
+                            $sum: {
+                              $cond: [{ $eq: ["$status", "ABSENT"] }, 1, 0],
+                            },
+                          },
                         },
                       },
-                      absentCount: {
-                        $sum: {
-                          $cond: [{ $eq: ["$status", "ABSENT"] }, 1, 0],
+                    ],
+                    byMeetingType: [
+                      {
+                        $group: {
+                          _id: "$meetingType",
+                          totalRecords: { $sum: 1 },
+                          presentCount: {
+                            $sum: {
+                              $cond: [{ $eq: ["$status", "PRESENT"] }, 1, 0],
+                            },
+                          },
+                          absentCount: {
+                            $sum: {
+                              $cond: [{ $eq: ["$status", "ABSENT"] }, 1, 0],
+                            },
+                          },
                         },
                       },
-                    },
+                    ],
                   },
-                ],
-              },
-            },
-          ]),
+                },
+              ]),
           Finance.aggregate([
             {
               $match: {
@@ -1065,17 +1073,19 @@ router.get(
               },
             },
           ]),
-          Attendance.find({ memberId: member._id })
-            .populate(ATTENDANCE_POPULATE)
-            .sort({ date: -1, createdAt: -1 })
-            .limit(10),
+          isFinanceAdmin
+            ? Promise.resolve([])
+            : Attendance.find({ memberId: member._id })
+                .populate(ATTENDANCE_POPULATE)
+                .sort({ date: -1, createdAt: -1 })
+                .limit(10),
           Finance.find({ memberId: member._id })
             .populate(FINANCE_POPULATE)
             .sort({ date: -1, createdAt: -1 })
             .limit(10),
         ]);
 
-      const attendanceSummary = attendanceSummaryRows[0] || { totals: [], byMeetingType: [] };
+      const attendanceSummary = attendanceSummaryRows?.[0] || { totals: [], byMeetingType: [] };
       const financeSummary = financeSummaryRows[0] || { totals: [], byTransactionType: [] };
       const attendanceTotals = attendanceSummary.totals[0] || {
         totalAttendances: 0,
@@ -1102,13 +1112,15 @@ router.get(
               name: member.buscellId.name,
             }
           : null,
-        attendanceSummary: {
-          totalAttendances: attendanceTotals.totalAttendances,
-          presentCount: attendanceTotals.presentCount,
-          absentCount: attendanceTotals.absentCount,
-          byMeetingType: getAttendanceMeetingBreakdown(attendanceSummary.byMeetingType),
-          recentAttendanceRecords: recentAttendance.map(serializeAttendance),
-        },
+        attendanceSummary: isFinanceAdmin
+          ? null
+          : {
+              totalAttendances: attendanceTotals.totalAttendances,
+              presentCount: attendanceTotals.presentCount,
+              absentCount: attendanceTotals.absentCount,
+              byMeetingType: getAttendanceMeetingBreakdown(attendanceSummary.byMeetingType),
+              recentAttendanceRecords: recentAttendance.map(serializeAttendance),
+            },
         financeSummary: {
           totalFinanceRecords: financeTotals.totalFinanceRecords,
           totalAmountContributed: financeTotals.totalAmountContributed,

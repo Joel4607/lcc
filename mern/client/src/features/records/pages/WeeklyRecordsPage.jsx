@@ -61,10 +61,8 @@ export default function WeeklyRecordsPage() {
     user.role === ROLES.ECCLESIA_LEADER ? user.ecclesiaId || "" : ""
   );
   const [selectedBuscellId, setSelectedBuscellId] = useState("");
-  const [branchSundayOffering, setBranchSundayOffering] = useState("");
   const [buscellForm, setBuscellForm] = useState(emptyBuscellForm);
   const [savingBuscell, setSavingBuscell] = useState(false);
-  const [savingBranch, setSavingBranch] = useState(false);
 
   const weeksQuery = useQuery({
     queryKey: ["record-weeks", "list"],
@@ -150,10 +148,6 @@ export default function WeeklyRecordsPage() {
   }, [buscellItems, selectedBuscell, selectedBuscellId]);
 
   useEffect(() => {
-    if (user.role === ROLES.BRANCH_ADMIN) setBranchSundayOffering(toValue(branchQuery.data?.branchSundayOffering?.totalSundayOffering));
-  }, [branchQuery.data?.branchSundayOffering?.totalSundayOffering, user.role]);
-
-  useEffect(() => {
     [
       [weeksQuery, "Record weeks", "Unable to load record weeks."],
       [globalQuery, "Records", "Unable to load global record totals."],
@@ -200,23 +194,6 @@ export default function WeeklyRecordsPage() {
     }
   }
 
-  async function saveBranchOffering(event) {
-    event.preventDefault();
-    setSavingBranch(true);
-    try {
-      await api.post("/records/branch-sunday-offering", {
-        weekId: activeWeekId,
-        totalSundayOffering: toNumberOrNull(branchSundayOffering),
-      });
-      showToast({ title: "Sunday offering saved", message: "The branch Sunday offering total was saved." });
-      await branchQuery.refetch();
-    } catch (error) {
-      showToast({ type: "error", title: "Sunday offering", message: getApiErrorMessage(error, "Unable to save the branch Sunday offering.") });
-    } finally {
-      setSavingBranch(false);
-    }
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <header className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
@@ -240,22 +217,6 @@ export default function WeeklyRecordsPage() {
       </AnalyticsPanel>
 
       {summaryCards(user.role, scopeSummary).length ? <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{summaryCards(user.role, scopeSummary).map(([label, value, tone]) => <StatCard key={label} label={label} tone={tone} value={value} />)}</section> : null}
-
-      {user.role === ROLES.BRANCH_ADMIN ? (
-        <form className={panelClass} onSubmit={saveBranchOffering}>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="font-['Space_Grotesk'] text-xs uppercase tracking-[0.22em] text-slate-500">Branch Sunday Offering</p>
-              <h3 className="mt-2 text-xl font-bold text-slate-950">Save the branch Sunday offering total</h3>
-            </div>
-            {branchQuery.data?.branchSundayOffering?.updatedAt ? <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">Updated {formatDate(branchQuery.data.branchSundayOffering.updatedAt)}</span> : null}
-          </div>
-          <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-            <input className="rounded-2xl border border-slate-300 px-3 py-2.5 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100" min="0" onChange={(event) => setBranchSundayOffering(event.target.value)} step="0.01" type="number" value={branchSundayOffering} />
-            <button className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60" disabled={savingBranch || !activeWeekId} type="submit">{savingBranch ? "Saving..." : "Save Offering"}</button>
-          </div>
-        </form>
-      ) : null}
 
       {user.role === ROLES.SUPER_ADMIN ? (
         <section className={panelClass}>
