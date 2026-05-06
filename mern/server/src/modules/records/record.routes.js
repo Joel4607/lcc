@@ -394,7 +394,7 @@ router.post(
 
 router.post(
   "/branch-sunday-offering",
-  requireRole([ROLES.BRANCH_ADMIN]),
+  requireRole([ROLES.FINANCE_ADMIN]),
   async (req, res) => {
     try {
       const week = await resolveRecordWeek({

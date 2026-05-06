@@ -2,6 +2,8 @@
 
 A full-stack MERN application for church administration, Ecclesia structure management, weekly records, attendance, finance, analytics, reporting, and CSV export.
 
+> Code audit note: this branch exists to open a GitHub pull request for CodeRabbit review.
+
 ## Tech Stack
 
 - Backend: Node.js, Express, MongoDB Atlas, Mongoose, JWT, Winston

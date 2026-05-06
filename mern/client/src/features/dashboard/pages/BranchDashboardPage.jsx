@@ -6,15 +6,13 @@ import { AnalyticsPanel, EmptyState, StatCard, panelClass } from "../components/
 import { useAuth } from "../../auth/context/AuthContext";
 import { useToast } from "../../../shared/context/ToastContext";
 import { formatCurrency, formatDate, getBranchLabel } from "../../../shared/lib/data";
-import { displayMetric, toNumberOrNull, toValue, weekLabel } from "../../../shared/lib/recordsDashboard";
+import { displayMetric, weekLabel } from "../../../shared/lib/recordsDashboard";
 
 export default function BranchDashboardPage() {
   const { getApiErrorMessage, user } = useAuth();
   const { showToast } = useToast();
   const [selectedWeekId, setSelectedWeekId] = useState("");
   const [selectedEcclesiaId, setSelectedEcclesiaId] = useState("");
-  const [branchSundayOffering, setBranchSundayOffering] = useState("");
-  const [savingBranchOffering, setSavingBranchOffering] = useState(false);
 
   const weeksQuery = useQuery({
     queryKey: ["record-weeks", "dashboard", "branch"],
@@ -59,10 +57,6 @@ export default function BranchDashboardPage() {
   }, [ecclesiaItems, selectedEcclesiaId]);
 
   useEffect(() => {
-    setBranchSundayOffering(toValue(branchQuery.data?.branchSundayOffering?.totalSundayOffering));
-  }, [branchQuery.data?.branchSundayOffering?.totalSundayOffering]);
-
-  useEffect(() => {
     [
       [weeksQuery, "Record weeks", "Unable to load record weeks."],
       [branchQuery, "Branch dashboard", "Unable to load the branch hierarchy dashboard."],
@@ -77,37 +71,6 @@ export default function BranchDashboardPage() {
       }
     });
   }, [branchQuery, ecclesiaQuery, getApiErrorMessage, showToast, weeksQuery]);
-
-  async function saveSundayOffering(event) {
-    event.preventDefault();
-
-    if (!activeWeekId) {
-      return;
-    }
-
-    setSavingBranchOffering(true);
-
-    try {
-      await api.post("/records/branch-sunday-offering", {
-        weekId: activeWeekId,
-        totalSundayOffering: toNumberOrNull(branchSundayOffering),
-      });
-
-      showToast({
-        title: "Sunday offering saved",
-        message: "The branch Sunday offering total has been updated for this week.",
-      });
-      await branchQuery.refetch();
-    } catch (error) {
-      showToast({
-        type: "error",
-        title: "Sunday offering",
-        message: getApiErrorMessage(error, "Unable to save the branch Sunday offering."),
-      });
-    } finally {
-      setSavingBranchOffering(false);
-    }
-  }
 
   if ((weeksQuery.isLoading || branchQuery.isLoading) && !branchQuery.data) {
     return <EmptyState message="Loading your branch dashboard..." />;
@@ -132,8 +95,8 @@ export default function BranchDashboardPage() {
           {branchQuery.data.branch?.name || getBranchLabel(user.branch)} hierarchy at a glance
         </h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-          Watch weekly Ecclesia performance, save the Sunday offering total for the branch, and
-          open the buscell layer without leaving your branch scope.
+          Watch weekly Ecclesia performance, review branch roll-ups, and open the buscell layer
+          without leaving your branch scope.
         </p>
       </header>
 
@@ -159,7 +122,7 @@ export default function BranchDashboardPage() {
             </Link>
           </div>
         }
-        description="The selected week drives the branch summary, Ecclesia totals, and the Sunday offering value shown below."
+        description="The selected week drives the branch summary, Ecclesia totals, and read-only Sunday offering roll-up."
         eyebrow="Week Scope"
         title="Current reporting window"
       >
@@ -184,45 +147,6 @@ export default function BranchDashboardPage() {
           value={formatCurrency(summary.totalSundayOffering || 0)}
         />
       </section>
-
-      <form className={panelClass} onSubmit={saveSundayOffering}>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="font-['Space_Grotesk'] text-xs uppercase tracking-[0.22em] text-slate-500">
-              Branch Sunday Offering
-            </p>
-            <h3 className="mt-2 text-xl font-bold text-slate-950">
-              Capture the branch Sunday offering for the selected week
-            </h3>
-            <p className="mt-3 text-sm text-slate-600">
-              This value sits above the Ecclesia buscell roll-up and stays tied to the chosen week.
-            </p>
-          </div>
-          {branchQuery.data.branchSundayOffering?.updatedAt ? (
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-              Updated {formatDate(branchQuery.data.branchSundayOffering.updatedAt)}
-            </span>
-          ) : null}
-        </div>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-          <input
-            className="rounded-2xl border border-slate-300 px-3 py-2.5 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
-            min="0"
-            onChange={(event) => setBranchSundayOffering(event.target.value)}
-            step="0.01"
-            type="number"
-            value={branchSundayOffering}
-          />
-          <button
-            className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={savingBranchOffering || !activeWeekId}
-            type="submit"
-          >
-            {savingBranchOffering ? "Saving..." : "Save Offering"}
-          </button>
-        </div>
-      </form>
 
       <section className={panelClass}>
         <div className="flex flex-wrap items-center justify-between gap-3">
