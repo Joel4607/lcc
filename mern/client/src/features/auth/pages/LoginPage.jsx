@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../../../shared/context/ThemeContext";
+import { LoginForm } from "../../../shared/components/login-form";
+import { Button } from "../../../shared/components/ui/button";
+import { Card, CardContent } from "../../../shared/components/ui/card";
+import { Moon, ShieldCheck, Sparkles, Sun } from "lucide-react";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -63,116 +67,82 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center bg-slate-300/80 px-6 py-8 lg:px-10">
-      <div className="mx-auto grid w-full max-w-[1280px] overflow-hidden rounded-2xl border border-slate-300 bg-slate-100 shadow-[0_30px_90px_-55px_rgba(15,23,42,0.5)] lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="border-b border-slate-200 bg-slate-100 px-8 py-10 lg:border-b-0 lg:border-r">
-          <div className="inline-flex items-center gap-3 rounded-xl bg-white px-3 py-2">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-sky-600 text-sm font-extrabold text-white">
-              R
-            </div>
-            <p className="font-['Space_Grotesk'] text-xs uppercase tracking-[0.2em] text-slate-500">
-              LCC Admin Access
-            </p>
-          </div>
-          <h1 className="mt-7 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-            Welcome to your church operations workspace
-          </h1>
-          <p className="mt-4 max-w-xl text-base leading-7 text-slate-600">
-            Manage hierarchy, weekly records, attendance, finance, and reporting from one unified
-            control center.
-          </p>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">System</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">Role-based + Branch-safe</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Data Layer</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">MongoDB + Weekly Engine</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-white p-8 lg:p-10">
-          <div className="flex items-center justify-between gap-3">
-            <p className="font-['Space_Grotesk'] text-xs uppercase tracking-[0.22em] text-slate-500">
-              Sign In
-            </p>
-            <button
-              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-700"
-              onClick={toggleTheme}
-              type="button"
-            >
-              {isDark ? "Light mode" : "Dark mode"}
-            </button>
-          </div>
-          <h2 className="mt-3 text-2xl font-bold text-slate-950">Welcome back</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            Enter your credentials to continue to your role dashboard.
-          </p>
-
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Email</span>
-              <input
-                autoComplete="email"
-                className={`w-full rounded-xl bg-white px-3 py-2.5 outline-none transition focus:ring-2 focus:ring-sky-100 ${
-                  fieldErrors.email
-                    ? "border border-rose-300 focus:border-rose-400"
-                    : "border border-slate-300 focus:border-sky-400"
-                }`}
-                name="email"
-                onChange={handleChange}
-                placeholder="superadmin@lcc.local"
-                required
-                type="email"
-                value={formData.email}
-              />
-              {fieldErrors.email ? (
-                <span className="mt-2 block text-xs font-medium text-rose-600">{fieldErrors.email}</span>
-              ) : null}
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-700">Password</span>
-              <input
-                autoComplete="current-password"
-                className={`w-full rounded-xl bg-white px-3 py-2.5 outline-none transition focus:ring-2 focus:ring-sky-100 ${
-                  fieldErrors.password
-                    ? "border border-rose-300 focus:border-rose-400"
-                    : "border border-slate-300 focus:border-sky-400"
-                }`}
-                name="password"
-                onChange={handleChange}
-                placeholder="Enter your password"
-                required
-                type="password"
-                value={formData.password}
-              />
-              {fieldErrors.password ? (
-                <span className="mt-2 block text-xs font-medium text-rose-600">
-                  {fieldErrors.password}
-                </span>
-              ) : null}
-            </label>
-
-            {error ? (
-              <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm font-medium text-rose-700">
-                {error}
+    <main className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground md:p-10">
+      <Card className="w-full max-w-5xl overflow-hidden shadow-2xl">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <section className="flex flex-col gap-6 p-6 md:p-10">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="grid size-10 place-items-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground shadow-sm">
+                  L
+                </div>
+                <div>
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    LCC Admin
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">Operations Suite</p>
+                </div>
               </div>
-            ) : null}
+              <Button onClick={toggleTheme} size="icon" type="button" variant="outline">
+                {isDark ? <Sun /> : <Moon />}
+                <span className="sr-only">{isDark ? "Use light mode" : "Use dark mode"}</span>
+              </Button>
+            </div>
 
-            <button
-              className="w-full rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={isSubmitting}
-              type="submit"
-            >
-              {isSubmitting ? "Signing in..." : "Sign in"}
-            </button>
-          </form>
-        </section>
-      </div>
+            <div className="flex flex-1 items-center justify-center">
+              <LoginForm
+                className="w-full max-w-sm"
+                error={error}
+                fieldErrors={fieldErrors}
+                formData={formData}
+                isSubmitting={isSubmitting}
+                onChange={handleChange}
+                onSubmit={handleSubmit}
+              />
+            </div>
+          </section>
+
+          <section className="relative hidden min-h-[560px] overflow-hidden border-l bg-muted md:block">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary)/0.28),transparent_32%),radial-gradient(circle_at_80%_15%,hsl(var(--chart-2)/0.2),transparent_26%),linear-gradient(135deg,hsl(var(--background)),hsl(var(--muted)))]" />
+            <div className="relative flex h-full flex-col justify-between p-10">
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+                <ShieldCheck />
+                Secure role-based access
+              </div>
+
+              <div className="grid gap-4">
+                <div className="rounded-xl border bg-background/85 p-5 shadow-lg backdrop-blur">
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-9 place-items-center rounded-md bg-primary/10 text-primary">
+                      <Sparkles />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Unified ministry data</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Branches, buscells, records, attendance, and finance in one workspace.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-xl border bg-background/85 p-4 shadow-sm backdrop-blur">
+                    <p className="font-display text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                      Access
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-foreground">Branch-safe</p>
+                  </div>
+                  <div className="rounded-xl border bg-background/85 p-4 shadow-sm backdrop-blur">
+                    <p className="font-display text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                      Records
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-foreground">Weekly-ready</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </CardContent>
+      </Card>
     </main>
   );
 }

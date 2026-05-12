@@ -590,7 +590,7 @@ export default function AttendancePage({ hideHeader = false }) {
               </div>
 
               <button
-                className="mt-4 w-full rounded-full bg-slate-1000 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 w-full rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={isSavingEdit}
                 type="submit"
               >
