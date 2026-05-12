@@ -2,11 +2,25 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import api from "../../../shared/api/client";
-import { AnalyticsPanel, EmptyState, StatCard, panelClass } from "../components/AnalyticsWidgets";
+import { AnalyticsPanel, EmptyState, StatCard } from "../components/AnalyticsWidgets";
 import { useAuth } from "../../auth/context/AuthContext";
 import { useToast } from "../../../shared/context/ToastContext";
 import { formatCurrency, formatDate } from "../../../shared/lib/data";
 import { displayMetric, weekLabel } from "../../../shared/lib/recordsDashboard";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../shared/components/ui/card";
+import { Badge } from "../../../shared/components/ui/badge";
+import { Button } from "../../../shared/components/ui/button";
+import {
+  Globe,
+  Calendar,
+  Users,
+  ChevronRight,
+  Building2,
+  CheckCircle2,
+  Church,
+  ArrowUpRight,
+  Layers,
+} from "lucide-react";
 
 export default function GlobalDashboardPage() {
   const { getApiErrorMessage } = useAuth();
@@ -85,58 +99,71 @@ export default function GlobalDashboardPage() {
   const branchDetail = branchDetailQuery.data || null;
 
   return (
-    <div className="flex flex-col gap-4">
-      <header className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-        <p className="font-['Space_Grotesk'] text-xs uppercase tracking-[0.22em] text-slate-500">
-          Global Dashboard
-        </p>
-        <h2 className="mt-3 text-2xl font-extrabold text-slate-950">
-          Branch summaries with Ecclesia drill-down
-        </h2>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-          Review the active reporting week across all branches, then open one branch at a time to
-          inspect its Ecclesia totals without leaving the hierarchy view.
-        </p>
-      </header>
+    <div className="flex flex-col gap-5">
+      {/* Hero Header */}
+      <Card className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-primary/5 shadow-lg">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-primary/10 p-2">
+              <Globe className="h-5 w-5 text-primary" />
+            </div>
+            <p className="font-display text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Global Dashboard
+            </p>
+          </div>
+          <CardTitle className="text-2xl font-extrabold">
+            Branch summaries with Ecclesia drill-down
+          </CardTitle>
+          <CardDescription className="max-w-2xl text-sm leading-relaxed">
+            Review the active reporting week across all branches, then open one branch at a time to
+            inspect its Ecclesia totals.
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
+      {/* Week Scope */}
       <AnalyticsPanel
         actions={
-          <div className="flex flex-wrap gap-3">
-            <select
-              className="min-w-[220px] rounded-2xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
-              onChange={(event) => setSelectedWeekId(event.target.value)}
-              value={activeWeekId}
-            >
-              {weeks.map((week) => (
-                <option key={week.id} value={week.id}>
-                  {weekLabel(week)}
-                </option>
-              ))}
-            </select>
-            <Link
-              className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-600"
-              to="/weekly-records"
-            >
-              Open Full Drill-Down
-            </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select
+                className="h-10 min-w-[220px] rounded-lg border border-input bg-background pl-9 pr-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+                onChange={(event) => setSelectedWeekId(event.target.value)}
+                value={activeWeekId}
+              >
+                {weeks.map((week) => (
+                  <option key={week.id} value={week.id}>
+                    {weekLabel(week)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button asChild>
+              <Link to="/weekly-records">
+                Open Full Drill-Down
+                <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
+            </Button>
           </div>
         }
-        description="The dashboard follows the 5-week reporting engine, so every branch summary reflects the selected week."
+        description="Every branch summary reflects the selected week from the 5-week reporting engine."
         eyebrow="Week Scope"
         title="Active reporting window"
       >
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <StatCard label="Cycle" tone="slate" value={activeWeek?.cycleId || "N/A"} />
-          <StatCard label="Start" value={activeWeek ? formatDate(activeWeek.startDate) : "N/A"} />
-          <StatCard label="End" value={activeWeek ? formatDate(activeWeek.endDate) : "N/A"} />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <StatCard label="Cycle" tone="slate" value={activeWeek?.cycleId || "N/A"} icon={Layers} />
+          <StatCard label="Start" value={activeWeek ? formatDate(activeWeek.startDate) : "N/A"} icon={Calendar} />
+          <StatCard label="End" value={activeWeek ? formatDate(activeWeek.endDate) : "N/A"} icon={Calendar} />
         </div>
       </AnalyticsPanel>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard label="Branches" tone="slate" value={summary.totalBranches || 0} />
-        <StatCard label="Submitted" tone="emerald" value={summary.submittedBranches || 0} />
-        <StatCard label="Sunday Attendance" value={summary.totalSundayAttendance || 0} />
-        <StatCard label="Buscell Attendance" value={summary.totalBuscellAttendance || 0} />
+      {/* KPI Summary Row */}
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <StatCard label="Branches" tone="slate" value={summary.totalBranches || 0} icon={Building2} />
+        <StatCard label="Submitted" tone="emerald" value={summary.submittedBranches || 0} icon={CheckCircle2} />
+        <StatCard label="Sunday Attendance" value={summary.totalSundayAttendance || 0} icon={Users} />
+        <StatCard label="Buscell Attendance" value={summary.totalBuscellAttendance || 0} icon={Users} />
         <StatCard
           label="Buscell Offering"
           value={formatCurrency(summary.totalBuscellOffering || 0)}
@@ -147,94 +174,98 @@ export default function GlobalDashboardPage() {
         />
       </section>
 
-      <section className={panelClass}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-xl font-bold text-slate-950">Branch roll-up</h3>
-            <p className="mt-2 text-sm text-slate-600">
-              Select a branch to inspect the Ecclesia totals contributing to its weekly summary.
-            </p>
+      {/* Branch Roll-Up Table */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle>Branch roll-up</CardTitle>
+              <CardDescription className="mt-1">
+                Select a branch to inspect its Ecclesia totals.
+              </CardDescription>
+            </div>
+            <Badge variant="secondary">{branchItems.length} branches</Badge>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-            {branchItems.length} branches
-          </span>
-        </div>
-
-        {!branchItems.length ? (
-          <div className="mt-4">
-            <EmptyState message="No branch summaries have been recorded for this week yet." />
-          </div>
-        ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-[0.2em] text-slate-500">
-                  <th className="pb-3 pr-4">Branch</th>
-                  <th className="pb-3 pr-4">Sunday Att.</th>
-                  <th className="pb-3 pr-4">Buscell Att.</th>
-                  <th className="pb-3 pr-4">Buscell Offering</th>
-                  <th className="pb-3 pr-4">Sunday Offering</th>
-                  <th className="pb-3">Drill-down</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
-                {branchItems.map((item) => (
-                  <tr key={item.branch.id}>
-                    <td className="py-3 pr-4">
-                      <p className="font-semibold text-slate-950">{item.branch.name}</p>
-                      <p className="mt-1 text-xs text-slate-500">{item.branch.code}</p>
-                    </td>
-                    <td className="py-3 pr-4">
-                      {displayMetric(item.summary.totalSundayAttendance)}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {displayMetric(item.summary.totalBuscellAttendance)}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {displayMetric(item.summary.totalBuscellOffering, formatCurrency)}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {displayMetric(item.summary.totalSundayOffering, formatCurrency)}
-                    </td>
-                    <td className="py-4">
-                      <button
-                        className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold"
-                        onClick={() => setSelectedBranchId(item.branch.id)}
-                        type="button"
-                      >
-                        {selectedBranchId === item.branch.id ? "Selected" : "View"}
-                      </button>
-                    </td>
+        </CardHeader>
+        <CardContent>
+          {!branchItems.length ? (
+            <EmptyState message="No branch summaries have been recorded for this week yet." icon={Building2} />
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-border">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-border bg-muted/50">
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Branch</th>
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Sunday Att.</th>
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Buscell Att.</th>
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Buscell Offering</th>
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Sunday Offering</th>
+                    <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {branchItems.map((item) => (
+                    <tr key={item.branch.id} className="transition-colors hover:bg-muted/30">
+                      <td className="px-4 py-3">
+                        <p className="text-sm font-semibold text-foreground">{item.branch.name}</p>
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">{item.branch.code}</p>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground">
+                        {displayMetric(item.summary.totalSundayAttendance)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground">
+                        {displayMetric(item.summary.totalBuscellAttendance)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground">
+                        {displayMetric(item.summary.totalBuscellOffering, formatCurrency)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground">
+                        {displayMetric(item.summary.totalSundayOffering, formatCurrency)}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          variant={selectedBranchId === item.branch.id ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedBranchId(item.branch.id)}
+                        >
+                          {selectedBranchId === item.branch.id ? "Selected" : "View"}
+                          <ChevronRight className="ml-1 h-3 w-3" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      <section className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+      {/* Branch Detail + Ecclesia Drill-Down */}
+      <section className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
         <AnalyticsPanel
           description={
             selectedBranch
-              ? "The selected branch summary is sourced from the same weekly record engine as the drill-down table."
-              : "Pick a branch above to inspect its Ecclesia structure."
+              ? "Summary sourced from the same weekly record engine."
+              : "Pick a branch above to inspect its structure."
           }
           eyebrow="Selected Branch"
-          title={selectedBranch ? `${selectedBranch.branch.name} overview` : "Branch detail"}
+          title={selectedBranch ? `${selectedBranch.branch.name}` : "Branch detail"}
         >
           {!selectedBranch ? (
-            <EmptyState message="Select a branch to view its summary." />
+            <EmptyState message="Select a branch to view its summary." icon={Building2} />
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-3">
               <StatCard
                 label="Submitted Ecclesias"
                 tone="emerald"
                 value={displayMetric(selectedBranch.summary.submittedEcclesias)}
+                icon={CheckCircle2}
               />
               <StatCard
                 label="Sunday Attendance"
                 value={displayMetric(selectedBranch.summary.totalSundayAttendance)}
+                icon={Users}
               />
               <StatCard
                 label="Buscell Attendance"
@@ -252,73 +283,68 @@ export default function GlobalDashboardPage() {
           )}
         </AnalyticsPanel>
 
-        <section className={panelClass}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-xl font-bold text-slate-950">Ecclesia drill-down</h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Drill into the selected branch to see which Ecclesias have submitted weekly data.
-              </p>
+        <Card>
+          <CardHeader>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <CardTitle>Ecclesia drill-down</CardTitle>
+                <CardDescription className="mt-1">
+                  Inspect which Ecclesias have submitted weekly data in the selected branch.
+                </CardDescription>
+              </div>
+              {branchDetail?.branch ? (
+                <Badge variant="info">{branchDetail.branch.name}</Badge>
+              ) : null}
             </div>
-            {branchDetail?.branch ? (
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-                {branchDetail.branch.name}
-              </span>
-            ) : null}
-          </div>
-
-          {!selectedBranchId ? (
-            <div className="mt-4">
-              <EmptyState message="Select a branch above to view its Ecclesias." />
-            </div>
-          ) : branchDetailQuery.isLoading && !branchDetail ? (
-            <div className="mt-4">
-              <EmptyState message="Loading branch drill-down..." />
-            </div>
-          ) : !branchDetail?.items?.length ? (
-            <div className="mt-4">
-              <EmptyState message="No Ecclesias are available in this branch yet." />
-            </div>
-          ) : (
-            <div className="mt-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.2em] text-slate-500">
-                    <th className="pb-3 pr-4">Ecclesia</th>
-                    <th className="pb-3 pr-4">Sunday Att.</th>
-                    <th className="pb-3 pr-4">Buscell Att.</th>
-                    <th className="pb-3 pr-4">Buscell Offering</th>
-                    <th className="pb-3">Submitted Buscells</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
-                  {branchDetail.items.map((item) => (
-                    <tr key={item.ecclesia.id}>
-                      <td className="py-3 pr-4">
-                        <p className="font-semibold text-slate-950">{item.ecclesia.name}</p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {item.ecclesia.leader?.name || "No leader assigned"}
-                        </p>
-                      </td>
-                      <td className="py-3 pr-4">
-                        {displayMetric(item.summary.totalSundayAttendance)}
-                      </td>
-                      <td className="py-3 pr-4">
-                        {displayMetric(item.summary.totalBuscellAttendance)}
-                      </td>
-                      <td className="py-3 pr-4">
-                        {displayMetric(item.summary.totalBuscellOffering, formatCurrency)}
-                      </td>
-                      <td className="py-4">
-                        {displayMetric(item.summary.submittedBuscells)}
-                      </td>
+          </CardHeader>
+          <CardContent>
+            {!selectedBranchId ? (
+              <EmptyState message="Select a branch above to view its Ecclesias." icon={Church} />
+            ) : branchDetailQuery.isLoading && !branchDetail ? (
+              <EmptyState message="Loading branch drill-down..." icon={Layers} />
+            ) : !branchDetail?.items?.length ? (
+              <EmptyState message="No Ecclesias are available in this branch yet." icon={Church} />
+            ) : (
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50">
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Ecclesia</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Sunday Att.</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Buscell Att.</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Buscell Offering</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Submitted Buscells</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {branchDetail.items.map((item) => (
+                      <tr key={item.ecclesia.id} className="transition-colors hover:bg-muted/30">
+                        <td className="px-4 py-3">
+                          <p className="text-sm font-semibold text-foreground">{item.ecclesia.name}</p>
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">
+                            {item.ecclesia.leader?.name || "No leader assigned"}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-foreground">
+                          {displayMetric(item.summary.totalSundayAttendance)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-foreground">
+                          {displayMetric(item.summary.totalBuscellAttendance)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-foreground">
+                          {displayMetric(item.summary.totalBuscellOffering, formatCurrency)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-foreground">
+                          {displayMetric(item.summary.submittedBuscells)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </section>
     </div>
   );

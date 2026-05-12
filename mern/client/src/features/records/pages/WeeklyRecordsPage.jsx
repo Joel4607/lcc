@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../../../shared/api/client";
-import { AnalyticsPanel, EmptyState, StatCard, panelClass } from "../../dashboard/components/AnalyticsWidgets";
+import { AnalyticsPanel, EmptyState, StatCard } from "../../dashboard/components/AnalyticsWidgets";
+
+const panelClass = "rounded-xl border border-border bg-card p-5 shadow-sm";
 import { useAuth } from "../../auth/context/AuthContext";
 import { useToast } from "../../../shared/context/ToastContext";
 import { formatCurrency, formatDate, getBranchLabel, getEcclesiaLabel } from "../../../shared/lib/data";
